@@ -1,15 +1,18 @@
+using System.Collections;
 using UnityEngine;
 
 public class GunMagazin : MonoBehaviour
 {
     [SerializeField] private float _moveSpeed;
     [SerializeField] private Transform _gunMagazin;
+    [SerializeField] private Bullet _bulletPrefab;
+    [SerializeField] private float _fireRate;
+    [SerializeField] private int _poolMaxSize = 30;
 
-    private float _targetError = 0.1f;
+    private BulletPool _bulletPool;
     private Transform[] _bullets;
-    private int _bulletIndex;
 
-    void Start()
+    private void Awake()
     {
         _bullets = new Transform[_gunMagazin.childCount];
 
@@ -17,34 +20,23 @@ public class GunMagazin : MonoBehaviour
         {
             _bullets[i] = _gunMagazin.GetChild(i);
         }
+
+        _bulletPool = new BulletPool(_bulletPrefab, _bullets.Length, _poolMaxSize);
     }
 
-    void Update()
+    void Start()
     {
-        MoveTowardsCurrentPlace();
+        StartCoroutine(ShootingCoroutine());
     }
 
-    private void MoveTowardsCurrentPlace()
+    private IEnumerator ShootingCoroutine()
     {
-        Transform targetPoint = _bullets[_bulletIndex];
-        transform.position = Vector3.MoveTowards(transform.position, targetPoint.position, _moveSpeed * Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, targetPoint.position) < _targetError)
+        while (enabled)
         {
-            NextBullet();
+            yield return new WaitForSeconds(_fireRate);
+
+            Bullet bullet = _bulletPool.GetBullet();
+            bullet.Fire( );
         }
-    }
-
-    private void NextBullet()
-    {
-        _bulletIndex++;
-
-        if (_bulletIndex >= _bullets.Length)
-        {
-            _bulletIndex = 0;
-        }
-
-        Vector3 nextPointPosition = _bullets[_bulletIndex].position;
-        transform.LookAt(nextPointPosition);
     }
 }

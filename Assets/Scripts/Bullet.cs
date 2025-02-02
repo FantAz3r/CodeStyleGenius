@@ -1,34 +1,25 @@
-using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Bullet : MonoBehaviour
 {
     [SerializeField] private float _bulletSpeed;
-    [SerializeField] private GameObject _bulletPrefab;
-    [SerializeField] private float _shootDelay;
 
-    public Transform _target;
+    private Rigidbody _bulletRigidbody;
+    private BulletPool _bulletPool;
 
-    private void Start()
+    private void Awake()
     {
-        StartCoroutine(ShootingCoroutine());
+        _bulletRigidbody = GetComponent<Rigidbody>();
     }
 
-    private IEnumerator ShootingCoroutine()
+    public void Fire()
     {
-        while (enabled)
-        {
-            yield return new WaitForSeconds(_shootDelay);
+        _bulletRigidbody.velocity = Vector3.forward * _bulletSpeed; 
+    }
 
-            if (_target != null)
-            {
-                Vector3 shootDirection = (_target.position - transform.position).normalized;
-                GameObject newBullet = Instantiate(_bulletPrefab, transform.position + shootDirection, Quaternion.identity);
-                Rigidbody bulletRigidbody = newBullet.GetComponent<Rigidbody>();
-                bulletRigidbody.velocity = shootDirection * _bulletSpeed;
-            }
-        }
+    private void OnCollisionEnter(Collision collision)
+    {
+        _bulletPool.ReleaseBullet(this); 
     }
 }
-
