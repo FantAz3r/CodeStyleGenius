@@ -3,23 +3,18 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] private float _bulletSpeed;
+    [SerializeField] private float _speed;
 
-    private Rigidbody _bulletRigidbody;
-    private BulletPool _bulletPool;
+    private Rigidbody _rigidbody;
 
-    private void Awake()
+    void Start()
     {
-        _bulletRigidbody = GetComponent<Rigidbody>();
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
-    public void Fire()
+    public void Move(Vector3 shootDirection)
     {
-        _bulletRigidbody.velocity = Vector3.forward * _bulletSpeed; 
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        _bulletPool.ReleaseBullet(this); 
+        transform.up = shootDirection;
+        _rigidbody.velocity = shootDirection * _speed;
     }
 }
